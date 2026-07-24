@@ -5,19 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="96b51983-a3e6-4be7-a3b6-977f6e4959c8" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/main/java/uz/aytjanov/googlephotosclone/dto/ResponseDto.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/uz/aytjanov/googlephotosclone/GooglePhotosCloneApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/uz/aytjanov/googlephotosclone/GooglePhotosCloneApplication.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/uz/aytjanov/googlephotosclone/model/Photo.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/uz/aytjanov/googlephotosclone/entity/Photo.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/uz/aytjanov/googlephotosclone/model/User.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/uz/aytjanov/googlephotosclone/entity/User.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/uz/aytjanov/googlephotosclone/controller/PhotosController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/uz/aytjanov/googlephotosclone/controller/PhotosController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/uz/aytjanov/googlephotosclone/repository/PhotosRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/uz/aytjanov/googlephotosclone/repository/PhotosRepository.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/uz/aytjanov/googlephotosclone/repository/UsersRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/uz/aytjanov/googlephotosclone/repository/UsersRepository.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/uz/aytjanov/googlephotosclone/service/PhotosService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/uz/aytjanov/googlephotosclone/service/PhotosService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/uz/aytjanov/googlephotosclone/service/UsersService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/uz/aytjanov/googlephotosclone/service/UsersService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/uz/aytjanov/googlephotosclone/web/GlobalExceptionHandler.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/uz/aytjanov/googlephotosclone/web/LoginController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/uz/aytjanov/googlephotosclone/controller/LoginController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/uz/aytjanov/googlephotosclone/web/PhotosController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/uz/aytjanov/googlephotosclone/controller/PhotosController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/uz/aytjanov/googlephotosclone/web/UsersController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/uz/aytjanov/googlephotosclone/controller/UsersController.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -270,7 +262,12 @@
       <workItem from="1783601393242" duration="2408000" />
       <workItem from="1783754488666" duration="4326000" />
       <workItem from="1783862993763" duration="2152000" />
-      <workItem from="1783968318461" duration="1030000" />
+      <workItem from="1783968318461" duration="1455000" />
+      <workItem from="1784031235634" duration="1311000" />
+      <workItem from="1784224823552" duration="14000" />
+      <workItem from="1784699097192" duration="2641000" />
+      <workItem from="1784804441937" duration="4214000" />
+      <workItem from="1784816435592" duration="2984000" />
     </task>
     <servers />
   </component>

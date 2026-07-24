@@ -5,6 +5,8 @@ import org.springframework.stereotype.Service;
 import uz.aytjanov.googlephotosclone.entity.Photo;
 import uz.aytjanov.googlephotosclone.repository.PhotosRepository;
 
+import java.util.Optional;
+
 @Service
 public class PhotosService {
     private final PhotosRepository photosRepository;
@@ -23,7 +25,7 @@ public class PhotosService {
     public void delete(Long id) {
         photosRepository.removeById(id);
     }
-    public Photo getPhoto(Long id) {
+    public Optional<Photo> getPhoto(Long id) {
         return photosRepository.findById(id);
     }
 }

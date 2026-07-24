@@ -13,6 +13,8 @@ import uz.aytjanov.googlephotosclone.service.UsersService;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.Optional;
+
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 
@@ -27,9 +29,9 @@ public class PhotosController {
         return userId;
     }
     private Photo getPhoto (Long id) {
-        Photo photo = photosService.getPhoto(id);
-        if (photo == null) throw new ResponseStatusException(NOT_FOUND);
-        return photo;
+        Optional<Photo> photo =  photosService.getPhoto(id);
+        if (photo.isEmpty()) throw new ResponseStatusException(NOT_FOUND);
+        return photo.orElse(null);
     }
 
     public PhotosController(PhotosService photosService, UsersService usersService) {
@@ -56,11 +58,11 @@ public class PhotosController {
    @GetMapping("/api/photos/{id}")
    public ResponseEntity<byte[]> openFile(@PathVariable Long id, HttpSession session) {
         Long userId = requireUserId(session);
-        Photo photo = photosService.getPhoto(id);
-        if (photo == null || !photo.getUser().getId().equals(userId)) {
+        Optional<Photo> photo = photosService.getPhoto(id);
+        if (photo.isEmpty() || !photo.get().getUser().getId().equals(userId)) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok().header("Content-Type", photo.getContentType()).body(photo.getData());
+        return ResponseEntity.ok().header("Content-Type", photo.get().getContentType()).body(photo.get().getData());
    }
    @PostMapping("/api/logout")
    public ResponseEntity<?> logout(HttpSession session) {
@@ -78,7 +80,7 @@ public class PhotosController {
             photo.setFileName(file.getOriginalFilename());
             photosService.savePhoto(photo);
             return ResponseEntity.status(HttpStatus.CREATED).body(new ResponseDto(photo.getFileName(), photo.getContentType()));
-        } throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        } else throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
     }
     @DeleteMapping("/api/photos/{id}")
     public ResponseEntity<?> delete(@PathVariable Long id, HttpSession session) {

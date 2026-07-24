@@ -4,8 +4,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import uz.aytjanov.googlephotosclone.entity.User;
 
+import java.util.Optional;
+
 @Repository
-public interface UsersRepository extends JpaRepository<User, Integer> {
+public interface UsersRepository extends JpaRepository<User, Long> {
     User findByUsername(String username);
-    User findById(Long id);
+    Optional<User> findById(Long id);
 }
