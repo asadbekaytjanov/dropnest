@@ -12,6 +12,7 @@ import uz.aytjanov.googlephotosclone.service.PhotosService;
 import uz.aytjanov.googlephotosclone.service.UsersService;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -41,18 +42,7 @@ public class PhotosController {
    @GetMapping("/api/photos")
    public ResponseEntity<?> photos(HttpSession session) {
         Long userId = requireUserId(session);
-        var photos = photosService.getMediaByUserid(userId);
-        var result = new ArrayList<PhotoListDto>();
-        for (Photo photo : photos) {
-            result.add(
-                    new PhotoListDto(
-                            photo.getId(),
-                            photo.getFileName(),
-                            photo.getContentType(),
-                            "/api/photos/" + photo.getId()
-                    )
-            );
-        }
+        List<PhotoListDto> result = photosService.getAllUsersPhotosAsDtos(userId);
         return ResponseEntity.ok(result);
    }
    @GetMapping("/api/photos/{id}")
@@ -72,15 +62,12 @@ public class PhotosController {
 
     @PostMapping("/api/photos")
     public ResponseEntity<?> create(@RequestParam("file") MultipartFile file, HttpSession session) throws IOException {
-        if (!file.isEmpty()) {
-            Photo photo = new Photo();
-            photo.setUser(usersService.getUser(requireUserId(session)));
-            photo.setData(file.getBytes());
-            photo.setContentType(file.getContentType());
-            photo.setFileName(file.getOriginalFilename());
-            photosService.savePhoto(photo);
-            return ResponseEntity.status(HttpStatus.CREATED).body(new ResponseDto(photo.getFileName(), photo.getContentType()));
-        } else throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        if (file.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "File is empty!");
+        }
+        Long userId = requireUserId(session);
+        Photo photo = photosService.createAndSave(userId, file);
+        return ResponseEntity.status(HttpStatus.CREATED).body(new ResponseDto(photo.getFileName(), photo.getContentType()));
     }
     @DeleteMapping("/api/photos/{id}")
     public ResponseEntity<?> delete(@PathVariable Long id, HttpSession session) {

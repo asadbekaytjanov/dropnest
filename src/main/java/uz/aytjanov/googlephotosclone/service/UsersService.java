@@ -4,6 +4,8 @@ import org.springframework.stereotype.Service;
 import uz.aytjanov.googlephotosclone.entity.User;
 import uz.aytjanov.googlephotosclone.repository.UsersRepository;
 
+import java.util.Optional;
+
 
 @Service
 public class UsersService {
@@ -23,7 +25,7 @@ public class UsersService {
     public boolean isUserExist(String username) {
         return usersRepository.findByUsername(username) != null;
     }
-    public User getUser(Long id) {
+    public Optional<User> getUser(Long id) {
         return usersRepository.findById(id);
     }
     public User authenticate(String username, String password) {

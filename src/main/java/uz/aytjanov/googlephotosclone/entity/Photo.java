@@ -12,8 +12,7 @@ public class Photo {
     private Long id;
     private String fileName;
     private String contentType;
-    @JsonIgnore
-    private byte[] data;
+    private String filePath;
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
@@ -43,12 +42,12 @@ public class Photo {
         return fileName;
     }
 
-    public byte[] getData() {
-        return data;
+    public String getFilePath() {
+        return filePath;
     }
 
-    public void setData(byte[] data) {
-        this.data = data;
+    public void setFilePath(String filePath) {
+        this.filePath = filePath;
     }
 
     public String getContentType() {
