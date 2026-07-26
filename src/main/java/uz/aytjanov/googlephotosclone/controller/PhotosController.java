@@ -28,8 +28,6 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 @RestController
 public class PhotosController {
     private final PhotosService photosService;
-    private final UsersService usersService;
-
     private Long requireUserId(HttpSession session) {
         Long userId = (Long) session.getAttribute("userId");
         if (userId == null) throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
@@ -39,9 +37,8 @@ public class PhotosController {
         if (photo == null) return false;
         return photo.getUser().getId().equals(userId);
     }
-    public PhotosController(PhotosService photosService, UsersService usersService) {
+    public PhotosController(PhotosService photosService) {
         this.photosService = photosService;
-        this.usersService = usersService;
     }
    @GetMapping("/api/photos")
    public ResponseEntity<?> photos(HttpSession session) {

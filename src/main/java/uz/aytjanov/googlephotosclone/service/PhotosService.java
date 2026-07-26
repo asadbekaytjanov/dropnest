@@ -9,7 +9,9 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.function.ServerRequest;
 import uz.aytjanov.googlephotosclone.dto.PhotoListDto;
 import uz.aytjanov.googlephotosclone.entity.Photo;
+import uz.aytjanov.googlephotosclone.entity.User;
 import uz.aytjanov.googlephotosclone.repository.PhotosRepository;
+import uz.aytjanov.googlephotosclone.repository.UsersRepository;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,23 +27,17 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 @Service
 public class PhotosService {
     private final PhotosRepository photosRepository;
+    private final UsersRepository usersRepository;
 
-    public PhotosService(PhotosRepository photosRepository) {
+    public PhotosService(PhotosRepository photosRepository, UsersRepository usersRepository) {
         this.photosRepository = photosRepository;
+        this.usersRepository = usersRepository;
     }
     public Photo getPhoto(Long id) {
         Optional<Photo> photo = photosRepository.findById(id);
         if (photo.isEmpty()) throw new ResponseStatusException(NOT_FOUND);
         return photo.orElse(null);
     }
-
-    public void savePhoto(Photo photo) {
-        photosRepository.save(photo);
-    }
-    public List<Photo> getMediaByUserid(Long userId) {
-       return photosRepository.findByUserId(userId);
-    }
-
     public Photo createAndSave(Long userId, MultipartFile file) throws IOException {
         String UPLOAD_DIRECTORY = "uploads/";
         Path uploadPath = Paths.get(UPLOAD_DIRECTORY);
@@ -52,10 +48,11 @@ public class PhotosService {
         Path filePath = uploadPath.resolve(uniqueFileName);
         file.transferTo(filePath);
         Photo photo = new Photo();
+        photo.setUser(usersRepository.findUserById(userId));
         photo.setContentType(file.getContentType());
         photo.setFileName(file.getOriginalFilename());
         photo.setFilePath(filePath.toString());
-        return photo;
+        return photosRepository.save(photo);
     }
     public ResponseEntity<byte[]> download(Long id, Long userId) throws IOException {
         Photo photo = getPhoto(id);
