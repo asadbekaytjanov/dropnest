@@ -1,20 +1,19 @@
 package uz.aytjanov.googlephotosclone.service;
 
-import com.sun.net.httpserver.Headers;
 import jakarta.transaction.Transactional;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
-import org.springframework.web.servlet.function.ServerRequest;
 import uz.aytjanov.googlephotosclone.dto.PhotoListDto;
 import uz.aytjanov.googlephotosclone.entity.Photo;
-import uz.aytjanov.googlephotosclone.entity.User;
 import uz.aytjanov.googlephotosclone.repository.PhotosRepository;
 import uz.aytjanov.googlephotosclone.repository.UsersRepository;
 
-import java.io.File;
+
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -38,27 +37,13 @@ public class PhotosService {
         if (photo.isEmpty()) throw new ResponseStatusException(NOT_FOUND);
         return photo.orElse(null);
     }
-    public Photo createAndSave(Long userId, MultipartFile file) throws IOException {
-        String UPLOAD_DIRECTORY = "uploads/";
-        Path uploadPath = Paths.get(UPLOAD_DIRECTORY);
-        if (!Files.exists(uploadPath)) {
-            Files.createDirectories(uploadPath);
-        }
-        String uniqueFileName = UUID.randomUUID() + file.getOriginalFilename();
-        Path filePath = uploadPath.resolve(uniqueFileName);
-        file.transferTo(filePath);
-        Photo photo = new Photo();
-        photo.setUser(usersRepository.findUserById(userId));
-        photo.setContentType(file.getContentType());
-        photo.setFileName(file.getOriginalFilename());
-        photo.setFilePath(filePath.toString());
-        return photosRepository.save(photo);
-    }
     public ResponseEntity<byte[]> download(Long id, Long userId) throws IOException {
         Photo photo = getPhoto(id);
         if (!photo.getUser().getId().equals(userId)) throw new ResponseStatusException(HttpStatus.FORBIDDEN);
-        Path filePath = Path.of(photo.getFilePath());
-        byte[] data = Files.readAllBytes(filePath);
+        byte[] data;
+        try (InputStream in = URI.create(photo.getFilePath()).toURL().openStream()) {
+            data = in.readAllBytes();
+        }
         String contentType = photo.getContentType();
         MediaType mediaType;
         try {
@@ -77,7 +62,10 @@ public class PhotosService {
         return new ResponseEntity<>(data, headers, HttpStatus.OK);
     }
     public ResponseEntity<byte[]> openTheFile(Photo photo) throws IOException {
-        byte[] data = Files.readAllBytes(Path.of(photo.getFilePath()));
+        byte[] data;
+        try (InputStream in = URI.create(photo.getFilePath()).toURL().openStream()) {
+            data = in.readAllBytes();
+        }
         return ResponseEntity.ok().header("Content-Type", photo.getContentType()).body(data);
     }
     @Transactional

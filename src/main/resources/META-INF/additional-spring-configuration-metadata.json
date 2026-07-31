@@ -4,5 +4,10 @@
       "name": "spring.jpa.hibernate.ddl-auto",
       "type": "java.lang.String",
       "description": "Description for spring.jpa.hibernate.ddl-auto."
-  }
-] }
+    },
+    {
+      "name": "supabase.url",
+      "type": "java.lang.String",
+      "description": "Description for supabase.url."
+    }
+  ] }

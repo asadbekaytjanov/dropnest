@@ -47,18 +47,18 @@ function renderPhotos(photos) {
         if (photo.contentType && photo.contentType.startsWith('video/')) {
             media = document.createElement('video');
             media.className = 'media-video';
-            media.src = photo.viewUrl;
+            media.src = `/api/photos/${photo.id}`;
             media.muted = true;
             media.preload = 'metadata';
         } else {
             media = document.createElement('img');
             media.className = 'media-img';
-            media.src = photo.viewUrl;
+            media.src = `/api/photos/${photo.id}`;
             media.alt = photo.fileName;
         }
 
         const mediaLink = document.createElement('a');
-        mediaLink.href = photo.viewUrl;
+        mediaLink.href = `/api/photos/${photo.id}`;
         mediaLink.target = '_blank';
         mediaLink.rel = 'noopener noreferrer';
         mediaLink.style.display = 'block';
@@ -77,7 +77,7 @@ function renderPhotos(photos) {
         actions.className = 'card-actions';
 
         const viewLink = document.createElement('a');
-        viewLink.href = photo.viewUrl;
+        viewLink.href = `/api/photos/${photo.id}`;
         viewLink.target = '_blank';
         viewLink.rel = 'noopener noreferrer';
         viewLink.textContent = 'View';
