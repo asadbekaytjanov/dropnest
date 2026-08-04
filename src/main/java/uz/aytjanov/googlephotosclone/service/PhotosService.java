@@ -8,7 +8,6 @@ import org.springframework.web.server.ResponseStatusException;
 import uz.aytjanov.googlephotosclone.dto.PhotoListDto;
 import uz.aytjanov.googlephotosclone.entity.Photo;
 import uz.aytjanov.googlephotosclone.repository.PhotosRepository;
-import uz.aytjanov.googlephotosclone.repository.UsersRepository;
 
 
 import java.io.IOException;
@@ -19,6 +18,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import static org.springframework.http.HttpStatus.NOT_FOUND;
@@ -26,17 +26,17 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 @Service
 public class PhotosService {
     private final PhotosRepository photosRepository;
-    private final UsersRepository usersRepository;
 
-    public PhotosService(PhotosRepository photosRepository, UsersRepository usersRepository) {
+    public PhotosService(PhotosRepository photosRepository) {
         this.photosRepository = photosRepository;
-        this.usersRepository = usersRepository;
     }
+    // Get a specific photo
     public Photo getPhoto(Long id) {
         Optional<Photo> photo = photosRepository.findById(id);
         if (photo.isEmpty()) throw new ResponseStatusException(NOT_FOUND);
         return photo.orElse(null);
     }
+    // Download a photo
     public ResponseEntity<byte[]> download(Long id, Long userId) throws IOException {
         Photo photo = getPhoto(id);
         if (!photo.getUser().getId().equals(userId)) throw new ResponseStatusException(HttpStatus.FORBIDDEN);
@@ -46,6 +46,7 @@ public class PhotosService {
         }
         String contentType = photo.getContentType();
         MediaType mediaType;
+        // MediaType handling
         try {
             if (contentType == null || contentType.isBlank()) {
                 mediaType = MediaType.valueOf(MediaType.APPLICATION_OCTET_STREAM_VALUE);
@@ -59,8 +60,10 @@ public class PhotosService {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentDisposition(ContentDisposition.attachment().filename(photo.getFileName()).build());
         headers.setContentType(mediaType);
+        // return a data with headers with HttpStatus OK
         return new ResponseEntity<>(data, headers, HttpStatus.OK);
     }
+    // Open a specific file
     public ResponseEntity<byte[]> openTheFile(Photo photo) throws IOException {
         byte[] data;
         try (InputStream in = URI.create(photo.getFilePath()).toURL().openStream()) {
@@ -68,6 +71,7 @@ public class PhotosService {
         }
         return ResponseEntity.ok().header("Content-Type", photo.getContentType()).body(data);
     }
+    // deleting a file
     @Transactional
     public void delete(Long id) {
         photosRepository.removeById(id);
