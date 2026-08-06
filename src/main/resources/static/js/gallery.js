@@ -113,7 +113,8 @@ async function loadPhotos() {
         }
 
         if (!response.ok) {
-            showError('Unable to load photos. Please try again.');
+            const errData = response.json();
+            showError(errData.error)
             return;
         }
 
@@ -142,7 +143,8 @@ async function uploadFile(file) {
         }
 
         if (!response.ok) {
-            showError('Upload failed. Please try again.');
+            const errData = response.json();
+            showError(errData.error)
             return;
         }
 
@@ -179,7 +181,7 @@ async function deletePhoto(id) {
 fileInput.addEventListener('change', () => {
     const file = fileInput.files[0];
     if (file) {
-        uploadFile(file);
+        uploadFile(file)
         fileInput.value = '';
     }
 });
@@ -195,8 +197,11 @@ logoutBtn.addEventListener('click', async (event) => {
 });
 
 const storedUsername = localStorage.getItem('username');
-if (storedUsername) {
-    usernameEl.textContent = storedUsername;
-}
+const storedUserId = localStorage.getItem('userId')
+if (!storedUsername || !storedUserId) {
+   goToLogin()
 
-loadPhotos();
+} else{
+    usernameEl.textContent = storedUsername;
+    loadPhotos()
+}

@@ -26,7 +26,10 @@ public class PhotosController {
 
     private Long requireUserId(HttpSession session) {
         Long userId = (Long) session.getAttribute("userId");
-        if (userId == null) throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+        if (userId == null) {
+
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+        }
         return userId;
     }
     private boolean isPhotoBelongsToUser(Photo photo, Long userId) {
