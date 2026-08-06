@@ -39,8 +39,8 @@ src/main/java/uz/aytjanov/googlephotosclone/
 └── config/         // Application configuration
 
 src/main/resources/
-├── templates/      // Thymeleaf templates (login, register, gallery, upload)
-├── static/         // CSS, JS, images
+├── templates/      
+├── static/         // CSS, JS, (login, register, gallery, upload)
 └── application.properties
 
 ## Local Development
@@ -78,7 +78,7 @@ The application is deployed on [Render](https://render.com) using the Dockerfile
 ## Roadmap
 
 - **v1.0** – Core MVP: registration, upload, gallery, delete, session authentication, deployment
-- **v1.1** *(planned)* – File validation, improved error feedback
+- **v1.1** – File validation, improved error feedback
 - **v1.2** *(planned)* – Pagination and simple search
 - **v2.0** *(planned)* – Spring Security + JWT authentication, unit and integration tests
 
