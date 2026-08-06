@@ -23,7 +23,7 @@ PhotosApp allows users to create an account, upload images and videos, view them
 ## Technology Stack
 
 - **Backend:** Java 17, Spring Boot 3.4.5, Spring MVC, Spring Data JPA, Hibernate
-- **Frontend:** Thymeleaf, HTML5, CSS3 (flexbox/grid), minimal JavaScript
+- **Frontend:** HTML5, CSS3 (flexbox/grid), minimal JavaScript
 - **Database:** PostgreSQL (via JPA and JDBC)
 - **Build Tool:** Maven
 - **Deployment:** Render (cloud), Docker, Neon (cloud PostgreSQL)
@@ -77,10 +77,10 @@ The application is deployed on [Render](https://render.com) using the Dockerfile
 
 ## Roadmap
 
-- **v1.0** – Core MVP: registration, upload, gallery, delete, session authentication, deployment
-- **v1.1** – File validation, improved error feedback
-- **v1.2** *(planned)* – Pagination and simple search
-- **v2.0** *(planned)* – Spring Security + JWT authentication, unit and integration tests
+- **v1.0.0** – Core MVP: registration, upload, gallery, delete, session authentication, deployment
+- **v1.1.0** – File validation, improved error feedback
+- **v1.1.0** *(planned)* – Pagination and simple search
+- **v1.2.0** *(planned)* – Spring Security + JWT authentication, unit and integration tests
 
 ## Author
 
