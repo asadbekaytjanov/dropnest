@@ -106,15 +106,14 @@ function renderPhotos(photos) {
 async function loadPhotos() {
     try {
         const response = await fetch('/api/photos');
-
         if (response.status === 401) {
             goToLogin();
             return;
         }
 
         if (!response.ok) {
-            const errData = response.json();
-            showError(errData.error)
+            const errData = await response.json();
+            showError(errData.message)
             return;
         }
 
@@ -143,8 +142,8 @@ async function uploadFile(file) {
         }
 
         if (!response.ok) {
-            const errData = response.json();
-            showError(errData.error)
+            const errData = await response.json();
+            showError(errData.message)
             return;
         }
 

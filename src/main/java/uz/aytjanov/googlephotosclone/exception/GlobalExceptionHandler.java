@@ -1,10 +1,16 @@
 package uz.aytjanov.googlephotosclone.exception;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.server.ResponseStatusException;
+import uz.aytjanov.googlephotosclone.dto.ExceptionDto;
+
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -12,23 +18,54 @@ import java.util.Map;
 public class GlobalExceptionHandler {
     // maxUploadSize errors
     @ExceptionHandler(MaxUploadSizeExceededException.class)
-    public ResponseEntity<Map<String, String>> maxUploadSizeException(MaxUploadSizeExceededException exc) {
-        Map<String, String> response = new HashMap<>();
-        response.put("error", "Max upload size exceeded! Please keep it under 5MB.");
+    public ResponseEntity<ExceptionDto> maxUploadSizeException(MaxUploadSizeExceededException exc, HttpServletRequest request) {
+        ExceptionDto response = new ExceptionDto(
+                HttpStatus.CONTENT_TOO_LARGE.value(),
+                HttpStatus.CONTENT_TOO_LARGE.name(),
+                "Max upload size exceeded! Please keep it under 5MB.",
+                request.getRequestURI()
+        );
         return ResponseEntity.status(HttpStatus.CONTENT_TOO_LARGE).body(response);
     }
     // upload validation errors
     @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<Map<String, String>> illegalArgumentExc(IllegalArgumentException exc) {
-        Map<String, String> response =  new HashMap<>();
-        response.put("error", exc.getMessage());
+    public ResponseEntity<ExceptionDto> illegalArgumentExc(IllegalArgumentException exc, HttpServletRequest request) {
+        ExceptionDto response = new ExceptionDto(
+                HttpStatus.BAD_REQUEST.value(),
+                HttpStatus.BAD_REQUEST.name(),
+                "Only photos and videos are allowed.",
+                request.getRequestURI()
+        );
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
-    // internal server errors
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<ExceptionDto> handleResponseStatusException(
+            ResponseStatusException ex,
+            HttpServletRequest request
+    ) {
+        HttpStatusCode statusCode = ex.getStatusCode();
+        int status = statusCode.value();
+
+        String error = (statusCode instanceof HttpStatus hs) ? hs.name() : "ERROR";
+        String message = ex.getReason() != null ? ex.getReason() : "Request failed";
+        ExceptionDto response = new ExceptionDto(
+            status,
+            error,
+            message,
+            request.getRequestURI()
+        );
+        return ResponseEntity.status(statusCode).body(response);
+    }
+
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<Map<String, String>> exception(Exception exc) {
-        Map<String, String> response = new HashMap<>();
-        response.put("error", exc.getMessage());
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+    public ResponseEntity<ExceptionDto> handleGenericException(HttpServletRequest request) {
+        ExceptionDto response = new ExceptionDto(
+                 500,
+                 "INTERNAL_SERVER_ERROR",
+                 "Unexpected server error",
+                 request.getRequestURI()
+        );
+
+        return ResponseEntity.status(500).body(response);
     }
 }
