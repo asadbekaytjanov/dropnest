@@ -1,7 +1,7 @@
 ```markdown
 # PhotosApp - Personal Media Manager
 
-A full-stack web application for managing personal photos and videos, built with **Java, Spring Boot, PostgreSQL, and Thymeleaf**.
+A full-stack web application for managing personal photos and videos, built with **Java, Spring Boot, PostgreSQL**.
 
 **Live Deployment:** [https://photosapp-0kg0.onrender.com/]
 
@@ -23,10 +23,10 @@ PhotosApp allows users to create an account, upload images and videos, view them
 ## Technology Stack
 
 - **Backend:** Java 17, Spring Boot 3.4.5, Spring MVC, Spring Data JPA, Hibernate
-- **Frontend:** HTML5, CSS3 (flexbox/grid), minimal JavaScript
+- **Frontend:** HTML5, CSS3, JavaScript
 - **Database:** PostgreSQL (via JPA and JDBC)
 - **Build Tool:** Maven
-- **Deployment:** Render (cloud), Docker, Neon (cloud PostgreSQL)
+- **Deployment:** Render (cloud), Docker, Neon (cloud PostgreSQL), Supabase (Media storage)
 - **Version Control:** Git, GitHub
 
 ## Project Structure
@@ -79,7 +79,7 @@ The application is deployed on [Render](https://render.com) using the Dockerfile
 
 - **v1.0.0** – Core MVP: registration, upload, gallery, delete, session authentication, deployment
 - **v1.1.0** – File validation, improved error feedback
-- **v1.1.0** *(planned)* – Pagination and simple search
+- **v1.1.1** – Pagination and simple search
 - **v1.2.0** *(planned)* – Spring Security + JWT authentication, unit and integration tests
 
 ## Author

@@ -3,7 +3,6 @@ package uz.aytjanov.googlephotosclone.service;
 import org.springframework.stereotype.Service;
 import uz.aytjanov.googlephotosclone.entity.User;
 import uz.aytjanov.googlephotosclone.repository.UsersRepository;
-
 import java.util.Optional;
 
 

@@ -4,7 +4,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import uz.aytjanov.googlephotosclone.service.UsersService;
-
 import java.util.Map;
 
 @RestController

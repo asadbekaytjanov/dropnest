@@ -5,16 +5,27 @@ const emptyState = document.getElementById('emptyState');
 const galleryEl = document.getElementById('gallery');
 const fileInput = document.getElementById('fileInput');
 const logoutBtn = document.getElementById('logoutBtn');
+const searchInput = document.getElementById('searchInput');
+const prevBtn = document.getElementById('prevBtn');
+const nextBtn = document.getElementById('nextBtn');
+const pageIndicator = document.getElementById('pageIndicator');
+let currentPage = 0;
+let searchTerm = '';
+const pageSize = 12;
 
 function showError(message) {
-    errorMessage.textContent = message;
-    errorMessage.style.display = 'block';
+    const textEl = errorMessage.querySelector('.msg-text');
+    if (textEl) textEl.textContent = message;
+
+    errorMessage.style.display = 'flex';
     successMessage.style.display = 'none';
 }
 
 function showSuccess(message) {
-    successMessage.textContent = message;
-    successMessage.style.display = 'block';
+    const textEl = successMessage.querySelector('.msg-text');
+    if (textEl) textEl.textContent = message;
+
+    successMessage.style.display = 'flex';
     errorMessage.style.display = 'none';
 }
 
@@ -22,7 +33,6 @@ function hideMessages() {
     errorMessage.style.display = 'none';
     successMessage.style.display = 'none';
 }
-
 function goToLogin() {
     localStorage.removeItem('userId');
     localStorage.removeItem('username');
@@ -103,9 +113,13 @@ function renderPhotos(photos) {
     }
 }
 
+// UPDATE 1: URL parameters and handling the Spring Page<T> JSON structure
 async function loadPhotos() {
     try {
-        const response = await fetch('/api/photos');
+        // Construct the URL with pagination and search parameters
+        const url = `/api/photos?search=${encodeURIComponent(searchTerm)}&page=${currentPage}&size=${pageSize}`;
+        const response = await fetch(url);
+
         if (response.status === 401) {
             goToLogin();
             return;
@@ -113,14 +127,31 @@ async function loadPhotos() {
 
         if (!response.ok) {
             const errData = await response.json();
-            showError(errData.message)
+            showError(errData.message);
             return;
         }
 
-        const photos = await response.json();
-        renderPhotos(photos);
+        const pageData = await response.json();
+
+        // Pass only the array of photos (inside .contenjt) to your render function
+        renderPhotos(pageData.content);
+
+        // Update the Next/Prev buttons
+        updatePaginationUI(pageData);
+
     } catch (err) {
         showError('Unable to reach the server. Please try again.');
+    }
+}
+
+// UPDATE 2: Helper function to control button states
+function updatePaginationUI(pageData) {
+    if (prevBtn) prevBtn.disabled = pageData.first;
+    if (nextBtn) nextBtn.disabled = pageData.last;
+
+    if (pageIndicator) {
+        const displayPage = pageData.totalPages === 0 ? 0 : pageData.number + 1;
+        pageIndicator.textContent = `Page ${displayPage} of ${pageData.totalPages}`;
     }
 }
 
@@ -143,11 +174,17 @@ async function uploadFile(file) {
 
         if (!response.ok) {
             const errData = await response.json();
-            showError(errData.message)
+            showError(errData.message);
             return;
         }
 
         showSuccess('Uploaded successfully.');
+
+        // Reset to the first page and clear search so the user sees their new upload
+        currentPage = 0;
+        searchTerm = '';
+        if (searchInput) searchInput.value = '';
+
         await loadPhotos();
     } catch (err) {
         showError('Unable to reach the server. Please try again.');
@@ -171,16 +208,24 @@ async function deletePhoto(id) {
         }
 
         showSuccess('Deleted successfully.');
+
+        // If they delete the last item on a page, drop back a page
+        if (galleryEl.children.length === 1 && currentPage > 0) {
+            currentPage--;
+        }
+
         await loadPhotos();
     } catch (err) {
         showError('Unable to reach the server. Please try again.');
     }
 }
 
+// --- EVENT LISTENERS ---
+
 fileInput.addEventListener('change', () => {
     const file = fileInput.files[0];
     if (file) {
-        uploadFile(file)
+        uploadFile(file);
         fileInput.value = '';
     }
 });
@@ -195,12 +240,41 @@ logoutBtn.addEventListener('click', async (event) => {
     goToLogin();
 });
 
-const storedUsername = localStorage.getItem('username');
-const storedUserId = localStorage.getItem('userId')
-if (!storedUsername || !storedUserId) {
-   goToLogin()
+// UPDATE 3: Search and Pagination Event Listeners
+let debounceTimer;
+if (searchInput) {
+    searchInput.addEventListener('input', (e) => {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+            searchTerm = e.target.value.trim();
+            currentPage = 0; // Always jump back to page 1 on a new search
+            loadPhotos();
+        }, 300);
+    });
+}
 
-} else{
+if (prevBtn) {
+    prevBtn.addEventListener('click', () => {
+        if (currentPage > 0) {
+            currentPage--;
+            loadPhotos();
+        }
+    });
+}
+
+if (nextBtn) {
+    nextBtn.addEventListener('click', () => {
+        currentPage++;
+        loadPhotos();
+    });
+}
+
+// Initialize Application
+const storedUsername = localStorage.getItem('username');
+const storedUserId = localStorage.getItem('userId');
+if (!storedUsername || !storedUserId) {
+    goToLogin();
+} else {
     usernameEl.textContent = storedUsername;
-    loadPhotos()
+    loadPhotos();
 }

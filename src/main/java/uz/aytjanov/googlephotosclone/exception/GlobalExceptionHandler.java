@@ -10,10 +10,6 @@ import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.server.ResponseStatusException;
 import uz.aytjanov.googlephotosclone.dto.ExceptionDto;
 
-import java.time.Instant;
-import java.util.HashMap;
-import java.util.Map;
-
 @RestControllerAdvice
 public class GlobalExceptionHandler {
     // maxUploadSize errors

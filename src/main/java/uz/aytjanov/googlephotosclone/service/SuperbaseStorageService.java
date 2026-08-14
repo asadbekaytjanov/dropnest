@@ -7,11 +7,7 @@ import org.springframework.web.multipart.MultipartFile;
 import uz.aytjanov.googlephotosclone.entity.Photo;
 import uz.aytjanov.googlephotosclone.repository.PhotosRepository;
 import uz.aytjanov.googlephotosclone.repository.UsersRepository;
-
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Objects;
 import java.util.Set;
 

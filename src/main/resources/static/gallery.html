@@ -8,11 +8,11 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="gallery-page">
+
 <header>
     <div>
-        <h1>PhotosApp v1.1.0</h1>
-        <div class="greeting">Welcome, <span id="username">
-    <link rel="icon" href="data:i">User</span></div>
+        <h1>PhotosApp v1.1.1</h1>
+        <div class="greeting">Welcome, <span id="username">User</span></div>
     </div>
     <div class="nav">
         <form id="uploadForm">
@@ -23,14 +23,39 @@
     </div>
 </header>
 
-<div id="errorMessage" class="error-msg" style="display: none;"></div>
-<div id="successMessage" class="delete-msg" style="display: none;"></div>
+<!-- Search Bar (Toolbar) -->
+<div class="toolbar">
+    <div class="search-box">
+        <input type="text" id="searchInput" placeholder="Search photos..." />
+    </div>
+</div>
 
+<!-- Alert Messages -->
+<!-- Alert Messages with Close Buttons -->
+<div id="errorMessage" class="error-msg" style="display: none;">
+    <span class="msg-text"></span>
+    <button type="button" class="close-btn" onclick="hideMessages()">&times;</button>
+</div>
+
+<div id="successMessage" class="success-msg" style="display: none;">
+    <span class="msg-text"></span>
+    <button type="button" class="close-btn" onclick="hideMessages()">&times;</button>
+</div>
+
+<!-- Empty State -->
 <div id="emptyState" class="empty" style="display: none;">
     <p>No photos or videos yet. Click <strong>+ Upload</strong> to start.</p>
 </div>
 
+<!-- Photo Gallery Grid -->
 <div id="gallery" class="gallery"></div>
+
+<!-- Pagination Controls -->
+<div class="pagination-controls">
+    <button id="prevBtn" disabled>Previous</button>
+    <span id="pageIndicator">Page 1</span>
+    <button id="nextBtn" disabled>Next</button>
+</div>
 
 <script src="js/gallery.js" defer></script>
 </body>

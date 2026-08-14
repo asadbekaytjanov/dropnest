@@ -8,6 +8,8 @@
     --primary-hover: #3b5998;
     --danger: #c53030;
     --danger-bg: #fff5f5;
+    --success: #2f855a;
+    --success-bg: #f0fff4;
     --border: #e2e8f0;
     --radius: 8px;
     --shadow: 0 10px 25px rgba(0,0,0,0.05);
@@ -27,6 +29,13 @@ body {
     background: var(--bg);
     color: var(--text);
     line-height: 1.5;
+}
+
+/* Base Disabled State for Buttons */
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed !important;
+    pointer-events: none;
 }
 
 /* ========================
@@ -121,14 +130,27 @@ button:hover {
 
 .error,
 .error-msg {
-    color: #e53e3e;
+    color: var(--danger);
     font-size: 0.9rem;
-    background: #fff5f5;
-    padding: 0.6rem 1rem;
-    border-radius: 6px;
+    background: var(--danger-bg);
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius);
     margin-bottom: 1.5rem;
     text-align: left;
     border: 1px solid #fed7d7;
+    font-weight: 500;
+}
+
+.success-msg {
+    color: var(--success);
+    font-size: 0.9rem;
+    background: var(--success-bg);
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius);
+    margin-bottom: 1.5rem;
+    text-align: left;
+    border: 1px solid #c6f6d5;
+    font-weight: 500;
 }
 
 .link {
@@ -161,7 +183,7 @@ header {
     flex-wrap: wrap;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 2rem;
+    margin-bottom: 1.5rem;
     background: var(--card-bg);
     padding: 1.5rem;
     border-radius: var(--radius);
@@ -174,7 +196,7 @@ header h1 {
     color: var(--primary);
 }
 
-/* Nav buttons — scoped to direct children only to avoid hitting greeting text */
+/* Nav buttons */
 .nav {
     display: inline-flex;
     align-items: center;
@@ -217,7 +239,53 @@ header h1 {
     background: var(--primary-hover);
     border-color: var(--primary-hover);
 }
+/* Close (X) Button inside Alerts */
+.close-btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 24px !important;
+    height: 24px !important;
+    min-width: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background: transparent !important;
+    color: inherit !important;
+    border: none !important;
+    font-size: 1.25rem !important;
+    font-weight: bold !important;
+    line-height: 1 !important;
+    cursor: pointer !important;
+    opacity: 0.5;
+    transition: all 0.2s ease;
+}
 
+.close-btn:hover {
+    opacity: 1;
+    transform: scale(1.15);
+    background: transparent !important;
+}
+
+/* ========================
+   SEARCH & TOOLBAR
+   ======================== */
+.toolbar {
+    margin-bottom: 1.5rem;
+}
+
+.search-box {
+    width: 100%;
+}
+
+.search-box input {
+    margin-top: 0; /* Reset input margin-top */
+    background: var(--card-bg);
+    box-shadow: var(--card-shadow);
+}
+
+/* ========================
+   GRID & GALLERY CARDS
+   ======================== */
 .empty {
     text-align: center;
     padding: 3rem 2rem;
@@ -226,24 +294,6 @@ header h1 {
     color: var(--muted);
     font-size: 1.2rem;
     box-shadow: var(--card-shadow);
-}
-
-.delete-msg {
-    background: #fefcbf;
-    color: #975a16;
-    padding: 0.75rem 1rem;
-    border-radius: var(--radius);
-    margin-bottom: 1.5rem;
-    font-weight: 500;
-}
-
-.error-msg {
-    background: #fee2e2;
-    color: var(--danger);
-    padding: 0.75rem 1rem;
-    border-radius: var(--radius);
-    margin-bottom: 1.5rem;
-    font-weight: 500;
 }
 
 .gallery {
@@ -323,7 +373,7 @@ header h1 {
 
 .card-actions a.delete {
     color: var(--danger);
-    background: #fff5f5;
+    background: var(--danger-bg);
 }
 
 .card-actions a.delete:hover {
@@ -331,7 +381,54 @@ header h1 {
 }
 
 /* ========================
-   MOBILE — single block
+   PAGINATION CONTROLS
+   ======================== */
+.pagination-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1.5rem;
+    margin-top: 3rem;
+    padding: 1rem;
+}
+
+.pagination-controls button {
+    width: auto; /* Overrides full width */
+    min-width: 110px;
+    margin-top: 0;
+    padding: 0.65rem 1.25rem;
+    background: var(--card-bg);
+    color: var(--text);
+    border: 2px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 0.95rem;
+    font-weight: 600;
+    box-shadow: var(--card-shadow);
+    transition: all 0.2s ease;
+}
+
+.pagination-controls button:hover:not(:disabled) {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+.pagination-controls button:disabled {
+    background: #edf2f7;
+    border-color: #e2e8f0;
+    color: #a0aec0;
+    box-shadow: none;
+}
+
+#pageIndicator {
+    font-weight: 600;
+    color: var(--muted);
+    font-size: 0.95rem;
+    user-select: none;
+}
+
+/* ========================
+   MOBILE RESPONSIVE
    ======================== */
 @media (max-width: 600px) {
     header {
@@ -373,5 +470,15 @@ header h1 {
 
     .gallery {
         grid-template-columns: 1fr;
+    }
+
+    .pagination-controls {
+        gap: 0.75rem;
+    }
+
+    .pagination-controls button {
+        min-width: 90px;
+        padding: 0.5rem 0.8rem;
+        font-size: 0.85rem;
     }
 }

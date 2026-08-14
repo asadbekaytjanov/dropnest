@@ -1,25 +1,20 @@
 package uz.aytjanov.googlephotosclone.service;
 
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Page;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import uz.aytjanov.googlephotosclone.dto.PhotoListDto;
 import uz.aytjanov.googlephotosclone.entity.Photo;
 import uz.aytjanov.googlephotosclone.repository.PhotosRepository;
-
-
+import org.springframework.data.domain.Pageable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+
 
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
@@ -62,6 +57,14 @@ public class PhotosService {
         headers.setContentType(mediaType);
         // return a data with headers with HttpStatus OK
         return new ResponseEntity<>(data, headers, HttpStatus.OK);
+    }
+    public Page<Photo> searchPhoto(String search, Pageable pageable) {
+        Page<Photo> result;
+        if (search.isBlank()) result = photosRepository.findAll(pageable);
+        else {
+            result = photosRepository.findByFileNameContainingIgnoreCase(search, pageable);
+        }
+        return result;
     }
     // Open a specific file
     public ResponseEntity<byte[]> openTheFile(Photo photo) throws IOException {

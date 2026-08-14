@@ -1,6 +1,5 @@
 package uz.aytjanov.googlephotosclone.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import org.springframework.data.annotation.Id;
 
