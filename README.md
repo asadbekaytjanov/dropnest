@@ -1,93 +1,147 @@
-```markdown
-# PhotosApp - Personal Media Manager
+# DropNest — Secure File Sharing
 
-A full-stack web application for managing personal photos and videos, built with **Java, Spring Boot, PostgreSQL**.
+DropNest is a full-stack web application for secure personal file storage and sharing.  
+Users can register, upload files, manage their library, and download files through authenticated access.
 
-**Live Deployment:** [https://photosapp-0kg0.onrender.com/]
+**Live Demo:** https://dropnest-eae7.onrender.com/
 
-## Overview
+---
 
-PhotosApp allows users to create an account, upload images and videos, view them in a private gallery, download files, and delete media. The application demonstrates core backend engineering skills: REST API design, relational database modeling, session-based authentication, server-side rendering, and containerized deployment.
+## What DropNest Does
 
-## Features
+DropNest focuses on a simple and reliable file workflow:
 
-- User registration and login with session-based authentication
-- Upload photos (JPEG, PNG) and videos (MP4)
-- Personal gallery displaying only the userEntity's own media
-- Download and delete media with ownership validation
-- Click-to-view full-size images and video playback
-- Responsive, minimalist interface
-- Docker containerization for consistent deployment
-- Secure file access: media is not accessible after logout (401)
+- Create account and log in
+- Upload files to private cloud storage
+- Browse your files with search, filtering, sorting, and pagination
+- Download files securely
+- Delete files with ownership checks
+- Clean, responsive UI for desktop and mobile
 
-## Technology Stack
+---
 
-- **Backend:** Java 17, Spring Boot 3.4.5, Spring MVC, Spring Data JPA, Hibernate
-- **Frontend:** HTML5, CSS3, JavaScript
-- **Database:** PostgreSQL (via JPA and JDBC)
+## Core Features
+
+- **Authentication:** JWT-based login flow
+- **Private storage:** Supabase Storage (private bucket)
+- **Ownership enforcement:** Users can only access their own files
+- **File management:** Upload, list, download, delete
+- **UX enhancements:** Upload progress, drag-and-drop upload, retry-friendly states
+- **Production deployment:** Dockerized app on Render + Neon PostgreSQL
+
+---
+
+## Tech Stack
+
+- **Backend:** Java 17, Spring Boot, Spring Web, Spring Data JPA, Spring Security
+- **Frontend:** HTML, CSS, Vanilla JavaScript
+- **Database:** PostgreSQL (Neon)
+- **Object Storage:** Supabase Storage
 - **Build Tool:** Maven
-- **Deployment:** Render (cloud), Docker, Neon (cloud PostgreSQL), Supabase (Media storage)
+- **Deployment:** Docker, Render
 - **Version Control:** Git, GitHub
 
-## Project Structure
+---
 
-src/main/java/uz/aytjanov/googlephotosclone/
-├── model/          // JPA entities (User, Photo/Media)
-├── repository/     // Spring Data repositories
-├── service/        // Business logic layer
-├── web/            // Spring MVC controllers
-└── config/         // Application configuration
+## Architecture (High Level)
 
-src/main/resources/
-├── templates/      
-├── static/         // CSS, JS, (login, register, gallery, upload)
-└── application.properties
+- **API Layer:** REST controllers for auth and file operations
+- **Service Layer:** Business rules (validation, ownership, storage integration)
+- **Persistence Layer:** JPA entities and repositories (users, file metadata)
+- **Storage Layer:** Supabase object storage for file binaries
 
-## Local Development
+---
+
+## API Overview
+
+> Base URL: `/api`
+
+### Auth
+- `POST /api/signup` — create account
+- `POST /api/login` — authenticate and receive JWT
+
+### Files
+- `GET /api/files` — list user files (search + pagination)
+- `POST /api/files` — upload file
+- `GET /api/files/{id}/download` — download file
+- `DELETE /api/files/{id}` — delete file (DB + storage object)
+
+---
+
+## Local Setup
 
 ### Prerequisites
-- Java 17 or later
+- Java 17+
 - Maven
-- PostgreSQL database (or use the provided H2 in-memory database for testing)
+- PostgreSQL (or Neon connection)
+- Supabase project with Storage enabled
 
-### Setup
-1. Clone the repository:
-   git clone https://github.com/asadbekaytjanov/photosapp.git
-   cd photosapp
-2. Configure the database connection in `src/main/resources/application.properties` (or set environment variables). Default configuration expects environment variables:
-   - `DATABASE_URL` (JDBC format, e.g., `jdbc:postgresql://host:port/dbname`)
-   - `DATABASE_USERNAME`
-   - `DATABASE_PASSWORD`
-3. Build and run:
-   mvn clean package -DskipTests
-   java -jar target/*.jar
-4. Open `http://localhost:8080` in your browser.
+### Environment Variables
 
-### Running with Docker
-docker build -t photosapp .
+Set these before running:
+
+- `DATABASE_URL`
+- `DATABASE_USERNAME`
+- `DATABASE_PASSWORD`
+- `JWT_SECRET`
+- `SUPABASE_URL`
+- `SUPABASE_KEY`
+
+### Run Locally
+
+```bash
+git clone https://github.com/asadbekaytjanov/photosapp.git
+cd photosapp
+mvn clean package -DskipTests
+java -jar target/*.jar
+```
+
+Open: `http://localhost:8080`
+
+---
+
+## Docker
+
+```bash
+docker build -t dropnest .
 docker run -p 8080:8080 \
   -e DATABASE_URL=jdbc:postgresql://... \
   -e DATABASE_USERNAME=... \
   -e DATABASE_PASSWORD=... \
-  photosapp
+  -e JWT_SECRET=... \
+  -e SUPABASE_URL=... \
+  -e SUPABASE_KEY=... \
+  dropnest
+```
 
-## Deployment
+---
 
-The application is deployed on [Render](https://render.com) using the Dockerfile in the repository. The PostgreSQL database is hosted on [Neon](https://neon.tech). Environment variables for the database are configured in the Render dashboard.
+## Security Notes
+
+- File endpoints are protected with JWT authentication.
+- File access is ownership-validated on the backend.
+- Supabase bucket is private; files are fetched through authorized backend calls.
+
+---
 
 ## Roadmap
 
-- **v1.0.0** – Core MVP: registration, upload, gallery, delete, session authentication, deployment
-- **v1.1.0** – File validation, improved error feedback
-- **v1.1.1** – Pagination and simple search
-- **v1.2.0** *(planned)* – Spring Security + JWT authentication, unit and integration tests
+- Shareable file links with token/expiration
+- Revoke link support
+- Improved audit logging
+- Automated tests (unit + integration)
+- Optional antivirus scanning pipeline
+
+---
 
 ## Author
 
 **Asadbek Aytjanov**
-- [LinkedIn](https://www.linkedin.com/in/aytjanov/)
-- [GitHub](https://github.com/asadbekaytjanov)
+- LinkedIn: https://www.linkedin.com/in/aytjanov/
+- GitHub: https://github.com/asadbekaytjanov
+
+---
 
 ## License
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+Licensed under the MIT License. See `LICENSE`.
