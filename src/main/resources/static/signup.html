@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign Up – DropNest</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="form-page">
+  <main class="auth-wrap">
+    <section class="auth-card">
+      <div class="app-branding">
+        <h1 class="app-name">DropNest</h1>
+        <p class="subtitle">Create your account to start sharing files.</p>
+      </div>
+
+      <h2>Create account</h2>
+      <div id="errorMessage" class="alert alert-error" style="display:none;"></div>
+
+      <form id="registerForm" novalidate>
+        <label for="username">Username</label>
+        <input
+          id="username"
+          name="username"
+          type="text"
+          placeholder="Choose username"
+          autocomplete="username"
+          required
+        />
+
+        <label for="password">Password</label>
+        <input
+          id="password"
+          name="password"
+          type="password"
+          placeholder="Create password"
+          autocomplete="new-password"
+          required
+        />
+
+        <button type="submit" class="btn-primary">Register</button>
+      </form>
+
+      <p class="link-row">Already have an account? <a href="login.html">Log in</a></p>
+    </section>
+  </main>
+
+  <script src="js/signup.js"></script>
+</body>
+</html>

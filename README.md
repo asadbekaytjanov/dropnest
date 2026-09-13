@@ -13,7 +13,7 @@ PhotosApp allows users to create an account, upload images and videos, view them
 
 - User registration and login with session-based authentication
 - Upload photos (JPEG, PNG) and videos (MP4)
-- Personal gallery displaying only the user's own media
+- Personal gallery displaying only the userEntity's own media
 - Download and delete media with ownership validation
 - Click-to-view full-size images and video playback
 - Responsive, minimalist interface

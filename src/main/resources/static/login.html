@@ -1,39 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login – PhotosApp</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📷</text></svg>">
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login – DropNest</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body class="form-page">
-<div class="container">
-    <div class="app-branding">
-        <span class="app-logo">📷</span>
-        <h1 class="app-name">PhotosApp v1.1.1</h1>
-    </div>
-    <h2>Log in to your account</h2>
+  <main class="auth-wrap">
+    <section class="auth-card">
+      <div class="app-branding">
+        <h1 class="app-name">DropNest</h1>
+        <p class="subtitle">Secure file sharing, minus the noise.</p>
+      </div>
 
-    <div id="errorMessage" class="error" style="display: none;"></div>
+      <h2>Log in</h2>
+      <div id="errorMessage" class="alert alert-error" style="display:none;"></div>
 
-    <form id="loginForm">
-        <label>
-            Username
-            <input type="text" id="username" name="username" placeholder="Enter username" required>
-        </label>
-        <label>
-            Password
-            <input type="password" id="password" name="password" placeholder="Enter password" required>
-        </label>
-        <button type="submit">Log in</button>
-    </form>
+      <form id="loginForm" novalidate>
+        <label for="username">Username</label>
+        <input id="username" name="username" type="text" placeholder="Enter username" autocomplete="username" required />
 
-    <div class="link">
-        Don't have an account? <a href="register.html">Register</a>
-    </div>
-</div>
+        <label for="password">Password</label>
+        <input id="password" name="password" type="password" placeholder="Enter password" autocomplete="current-password" required />
 
-<script src="js/login.js"></script>
+        <button type="submit" class="btn-primary">Log in</button>
+      </form>
+
+      <p class="link-row">Don't have an account? <a href="signup.html">Register</a></p>
+    </section>
+  </main>
+
+  <script src="js/login.js"></script>
 </body>
 </html>

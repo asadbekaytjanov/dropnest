@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Files – DropNest</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="files-page">
+  <div class="app-shell">
+    <header class="topbar">
+      <div>
+        <h1>DropNest</h1>
+        <p class="muted">Welcome, <span id="username">User</span></p>
+      </div>
+      <div class="topbar-actions">
+        <button id="uploadBtn" class="btn-primary" type="button">+ Upload</button>
+        <a href="#" id="logoutBtn" class="btn-ghost">Logout</a>
+      </div>
+    </header>
+
+    <section class="panel">
+      <div class="toolbar">
+        <input type="text" id="searchInput" placeholder="Search files..." />
+        <select id="typeFilter">
+          <option value="all">All types</option>
+          <option value="image">Images</option>
+          <option value="video">Videos</option>
+          <option value="pdf">PDF</option>
+          <option value="archive">Archive</option>
+          <option value="other">Other</option>
+        </select>
+        <select id="sortBy">
+          <option value="date_desc">Newest</option>
+          <option value="date_asc">Oldest</option>
+          <option value="name_asc">Name A-Z</option>
+          <option value="name_desc">Name Z-A</option>
+          <option value="size_desc">Largest</option>
+          <option value="size_asc">Smallest</option>
+        </select>
+      </div>
+
+      <div id="dropZone" class="drop-zone hidden">
+        <strong>Drop files to upload</strong>
+        <span>Release to start upload</span>
+      </div>
+
+      <input type="file" id="fileInput" name="file" hidden />
+
+      <div id="uploadPanel" class="upload-panel" style="display:none;">
+        <div class="upload-head">
+          <span id="uploadFileName">Uploading...</span>
+          <button type="button" id="cancelUploadBtn" class="btn-ghost btn-small">Cancel</button>
+        </div>
+        <div class="progress-track">
+          <div id="progressBar" class="progress-bar"></div>
+        </div>
+      </div>
+
+      <div id="errorMessage" class="alert alert-error" style="display:none;">
+        <span class="msg-text"></span>
+        <button type="button" class="close-btn" onclick="hideMessages()">&times;</button>
+      </div>
+
+      <div id="successMessage" class="alert alert-success" style="display:none;">
+        <span class="msg-text"></span>
+        <button type="button" class="close-btn" onclick="hideMessages()">&times;</button>
+      </div>
+
+      <div id="loadingState" class="state-box" style="display:none;">Loading files...</div>
+      <div id="emptyState" class="state-box" style="display:none;">No files yet.</div>
+
+      <div id="gallery" class="gallery"></div>
+
+      <div class="pagination-controls">
+        <button id="prevBtn" class="btn-ghost" disabled>Previous</button>
+        <span id="pageIndicator">Page 1</span>
+        <button id="nextBtn" class="btn-ghost" disabled>Next</button>
+      </div>
+    </section>
+  </div>
+
+  <script src="js/myfiles.js" defer></script>
+</body>
+</html>
