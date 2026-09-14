@@ -12,17 +12,17 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import uz.aytjanov.dropnest.service.CustomUserDetailsService;
-
 import java.io.IOException;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtUtils jwtUtils;
     private final CustomUserDetailsService customUserDetailsService;
-
-    public JwtAuthenticationFilter(JwtUtils jwtUtils, CustomUserDetailsService customUserDetailsService) {
+    private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
+    public JwtAuthenticationFilter(JwtUtils jwtUtils, CustomUserDetailsService customUserDetailsService,  CustomAuthenticationEntryPoint customAuthenticationEntryPoint) {
         this.jwtUtils = jwtUtils;
         this.customUserDetailsService = customUserDetailsService;
+        this.customAuthenticationEntryPoint = customAuthenticationEntryPoint;
     }
 
     @Override
@@ -39,10 +39,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
+            filterChain.doFilter(request, response);
         } catch (Exception e) {
-            System.err.println("Cannot set user authentication: " + e.getMessage());
+            SecurityContextHolder.clearContext();
+            customAuthenticationEntryPoint.commence(
+                    request,
+                    response,
+                    new org.springframework.security.authentication.BadCredentialsException("Invalid or expired token", e)
+            );
         }
-        filterChain.doFilter(request, response);
     }
     private String parseJwt(HttpServletRequest request) {
         String headerAuth = request.getHeader("Authorization");

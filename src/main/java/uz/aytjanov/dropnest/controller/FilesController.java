@@ -96,7 +96,6 @@ public class FilesController {
     public ResponseEntity<byte[]> download(
             @PathVariable Long id,
             @AuthenticationPrincipal CustomUserDetails currentUser) throws IOException {
-
         Long userId = requireUserId(currentUser);
         return filesService.download(id, userId);
     }

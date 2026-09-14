@@ -24,7 +24,7 @@ public class UsersController {
         this.authenticationManager = authenticationManager;
     }
 
-   @PostMapping("/api/register")
+   @PostMapping("/api/signup")
    public ResponseEntity<Map<String, Object>> createUser(@RequestParam String username, @RequestParam String password) {
        if (usersService.isUserExist(username)) {
            return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("message", "The username is taken. Try another one"));
