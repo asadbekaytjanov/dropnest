@@ -43,7 +43,7 @@ DropNest focuses on a simple and reliable file workflow:
 
 ---
 
-## Architecture (High Level)
+## Architecture
 
 - **API Layer:** REST controllers for auth and file operations
 - **Service Layer:** Business rules (validation, ownership, storage integration)
@@ -57,8 +57,8 @@ DropNest focuses on a simple and reliable file workflow:
 > Base URL: `/api`
 
 ### Auth
-- `POST /api/signup` — create account
-- `POST /api/login` — authenticate and receive JWT
+- `POST /api/auth/signup` — create account
+- `POST /api/auth/login` — authenticate and receive JWT
 
 ### Files
 - `GET /api/files` — list user files (search + pagination)
