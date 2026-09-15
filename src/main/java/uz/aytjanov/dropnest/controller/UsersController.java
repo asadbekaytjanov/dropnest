@@ -12,8 +12,10 @@ import uz.aytjanov.dropnest.dto.LoginRequestDto;
 import uz.aytjanov.dropnest.security.JwtUtils;
 import uz.aytjanov.dropnest.service.UsersService;
 import java.util.Map;
+import java.util.Objects;
 
 @RestController
+@RequestMapping("/api/auth")
 public class UsersController {
    private final UsersService usersService;
    private final JwtUtils jwtUtils;
@@ -24,7 +26,7 @@ public class UsersController {
         this.authenticationManager = authenticationManager;
     }
 
-   @PostMapping("/api/signup")
+   @PostMapping("/signup")
    public ResponseEntity<Map<String, Object>> createUser(@RequestParam String username, @RequestParam String password) {
        if (usersService.isUserExist(username)) {
            return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("message", "The username is taken. Try another one"));
@@ -33,7 +35,7 @@ public class UsersController {
            return ResponseEntity.status(HttpStatus.CREATED).body(Map.of("username", username));
        }
    }
-    @PostMapping("/api/login")
+    @PostMapping("/login")
     public ResponseEntity<Map<String, String>> login(
            @Valid @RequestBody LoginRequestDto request
     ) {
@@ -45,7 +47,7 @@ public class UsersController {
         );
 
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        String token = jwtUtils.generateToken(userDetails);
+        String token = jwtUtils.generateToken(Objects.requireNonNull(userDetails));
         return ResponseEntity.ok(Map.of(
                 "token", token,
                 "username", userDetails.getUsername()

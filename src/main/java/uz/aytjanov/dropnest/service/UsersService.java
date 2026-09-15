@@ -5,7 +5,6 @@ import org.springframework.stereotype.Service;
 import uz.aytjanov.dropnest.entity.UserEntity;
 import uz.aytjanov.dropnest.repository.UsersRepository;
 
-
 @Service
 public class UsersService {
     private final UsersRepository usersRepository;

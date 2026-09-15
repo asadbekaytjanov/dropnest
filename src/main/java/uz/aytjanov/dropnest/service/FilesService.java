@@ -31,14 +31,13 @@ public class FilesService {
 
 
     // Get a specific file
-    public FileRecord getFile(Long id) {
-        return filesRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "File not found"));
+    public FileRecord getFile(Long id, Long userId) throws ResponseStatusException {
+        return filesRepository.findByIdAndOwnerId(id, userId);
     }
 
     // Download a file (owner only)
-    public ResponseEntity<byte[]> download(Long id, Long userId) throws IOException {
-        FileRecord fileRecord = getFile(id);
+    public ResponseEntity<byte[]> download(Long id, Long userId) {
+        FileRecord fileRecord = getFile(id, userId);
 
         if (!fileRecord.getOwner().getId().equals(userId)) {
             throw new ResponseStatusException(FORBIDDEN, "You cannot access this file");
@@ -69,7 +68,7 @@ public class FilesService {
 
     @Transactional
     public void delete(Long id, Long userId) {
-        FileRecord fileRecord = getFile(id);
+        FileRecord fileRecord = getFile(id, userId);
 
         if (fileRecord == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "File not found");

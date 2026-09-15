@@ -86,7 +86,7 @@ public class FilesController {
             @AuthenticationPrincipal CustomUserDetails currentUser) {
 
         Long userId = requireUserId(currentUser);
-        FileRecord fileRecord = filesService.getFile(id);
+        FileRecord fileRecord = filesService.getFile(id, userId);
         if (fileRecord == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "File not found");
         filesService.delete(id, userId);
         return ResponseEntity.noContent().build();

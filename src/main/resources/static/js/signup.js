@@ -68,7 +68,7 @@ registerForm.addEventListener('submit', async (event) => {
     params.set('username', username);
     params.set('password', password);
 
-    const response = await fetch('/api/register', {
+    const response = await fetch('/api/auth/signup', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: params
