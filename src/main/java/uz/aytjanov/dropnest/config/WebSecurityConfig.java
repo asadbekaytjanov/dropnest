@@ -39,7 +39,7 @@ public class WebSecurityConfig {
                 .authorizeHttpRequests((requests) -> requests
                         .requestMatchers("/", "/index.html", "/login.html", "/myfiles.html", "/signup.html",
                                 "/style.css", "/js/**",
-                                "/api/login", "/api/register").permitAll()
+                                "/api/auth/login", "/api/auth/signup").permitAll()
                         .anyRequest().authenticated()
                 ).authenticationProvider(authenticationProvider())
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(customAuthenticationEntryPoint))

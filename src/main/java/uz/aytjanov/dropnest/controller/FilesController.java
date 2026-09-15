@@ -36,12 +36,6 @@ public class FilesController {
         return currentUser.getId();
     }
 
-    private boolean isFileBelongsToUser(FileRecord fileRecord, Long userId) {
-        return fileRecord != null
-                && fileRecord.getOwner() != null
-                && fileRecord.getOwner().getId().equals(userId);
-    }
-
     @GetMapping
     public ResponseEntity<Page<FileListItemDto>> files(
             @AuthenticationPrincipal CustomUserDetails currentUser,
