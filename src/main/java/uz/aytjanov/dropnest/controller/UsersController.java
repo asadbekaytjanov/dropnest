@@ -12,7 +12,7 @@ import uz.aytjanov.dropnest.dto.LoginRequestDto;
 import uz.aytjanov.dropnest.security.JwtUtils;
 import uz.aytjanov.dropnest.service.UsersService;
 import java.util.Map;
-import java.util.Objects;
+import org.springframework.security.core.AuthenticationException;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -39,18 +39,21 @@ public class UsersController {
     public ResponseEntity<Map<String, String>> login(
            @Valid @RequestBody LoginRequestDto request
     ) {
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.username(),
-                        request.password()
-                )
-        );
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(request.username(), request.password())
+            );
 
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        String token = jwtUtils.generateToken(Objects.requireNonNull(userDetails));
-        return ResponseEntity.ok(Map.of(
-                "token", token,
-                "username", userDetails.getUsername()
-        ));
+            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+            String token = jwtUtils.generateToken(userDetails);
+
+            return ResponseEntity.ok(Map.of(
+                    "token", token,
+                    "username", userDetails.getUsername()
+            ));
+        } catch (AuthenticationException ex) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("message", "Invalid username or password"));
+        }
     }
 }
