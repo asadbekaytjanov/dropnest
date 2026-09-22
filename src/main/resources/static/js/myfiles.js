@@ -18,6 +18,14 @@ const uploadPanel = document.getElementById('uploadPanel');
 const uploadFileName = document.getElementById('uploadFileName');
 const progressBar = document.getElementById('progressBar');
 const cancelUploadBtn = document.getElementById('cancelUploadBtn');
+const quotaCard = document.getElementById('quotaCard');
+const quotaStatus = document.getElementById('quotaStatus');
+const quotaUsageText = document.getElementById('quotaUsageText');
+const quotaPercentText = document.getElementById('quotaPercentText');
+const quotaProgressBar = document.getElementById('quotaProgressBar');
+const quotaUsedText = document.getElementById('quotaUsedText');
+const quotaRemainingText = document.getElementById('quotaRemainingText');
+const quotaTotalText = document.getElementById('quotaTotalText');
 
 let currentPage = 0;
 let searchTerm = '';
@@ -50,7 +58,7 @@ async function apiFetch(url, options = {}) {
     }
 
     const headers = new Headers(options.headers || {});
-    headers.set('Authorization', `Bearer ${token}`);
+    headers.set('Authorization', 'Bearer ' + token);
 
     const response = await fetch(url, {
         ...options,
@@ -104,6 +112,93 @@ function formatBytes(bytes = 0) {
     const mb = kb / 1024;
     if (mb < 1024) return `${mb.toFixed(1)} MB`;
     return `${(mb / 1024).toFixed(1)} GB`;
+}
+
+function resetQuotaStateClasses() {
+    quotaCard.classList.remove('state-warning', 'state-danger', 'state-full');
+}
+
+function setQuotaLoading() {
+    resetQuotaStateClasses();
+    quotaStatus.textContent = 'Loading...';
+    quotaUsageText.textContent = '-- / --';
+    quotaPercentText.textContent = '--%';
+    quotaUsedText.textContent = '--';
+    quotaRemainingText.textContent = '--';
+    quotaTotalText.textContent = '--';
+    quotaProgressBar.style.width = '0%';
+    quotaProgressBar.setAttribute('aria-valuenow', '0');
+    quotaProgressBar.setAttribute('aria-valuetext', 'Storage usage loading');
+}
+
+function setQuotaUnavailable(message) {
+    resetQuotaStateClasses();
+    quotaStatus.textContent = message;
+    quotaUsageText.textContent = 'Quota unavailable';
+    quotaPercentText.textContent = '--';
+    quotaUsedText.textContent = '--';
+    quotaRemainingText.textContent = '--';
+    quotaTotalText.textContent = '--';
+    quotaProgressBar.style.width = '0%';
+    quotaProgressBar.setAttribute('aria-valuenow', '0');
+    quotaProgressBar.setAttribute('aria-valuetext', message);
+}
+
+function applyQuotaUsageTone(usedPercentage) {
+    resetQuotaStateClasses();
+    if (usedPercentage >= 100) {
+        quotaCard.classList.add('state-full');
+        quotaStatus.textContent = 'Full';
+        return;
+    }
+    if (usedPercentage >= 90) {
+        quotaCard.classList.add('state-danger');
+        quotaStatus.textContent = 'Nearly full';
+        return;
+    }
+    if (usedPercentage >= 75) {
+        quotaCard.classList.add('state-warning');
+        quotaStatus.textContent = 'Warning';
+        return;
+    }
+    quotaStatus.textContent = 'Healthy';
+}
+
+function renderQuota(quota) {
+    const total = Math.max(1, Number(quota.totalQuotaBytes || 0));
+    const remaining = Math.max(0, Math.min(total, Number(quota.remainingStorageBytes || 0)));
+    const used = Math.max(0, total - remaining);
+    const usedPercentage = Math.max(0, Math.min(100, Math.round((used / total) * 100)));
+
+    quotaUsageText.textContent = `${formatBytes(used)} / ${formatBytes(total)}`;
+    quotaPercentText.textContent = `${usedPercentage}%`;
+    quotaUsedText.textContent = formatBytes(used);
+    quotaRemainingText.textContent = formatBytes(remaining);
+    quotaTotalText.textContent = formatBytes(total);
+
+    quotaProgressBar.style.width = '0%';
+    requestAnimationFrame(() => {
+        quotaProgressBar.style.width = `${usedPercentage}%`;
+    });
+    quotaProgressBar.setAttribute('aria-valuenow', String(usedPercentage));
+    quotaProgressBar.setAttribute('aria-valuetext', `${usedPercentage}% used, ${formatBytes(remaining)} remaining`);
+
+    applyQuotaUsageTone(usedPercentage);
+}
+
+async function loadQuota() {
+    setQuotaLoading();
+    try {
+        const response = await apiFetch('/api/users/me/quota');
+        if (!response.ok) throw new Error('Failed to load quota');
+
+        const quotaData = await response.json();
+        renderQuota(quotaData);
+    } catch (err) {
+        if (err.message !== 'Authentication failed' && err.message !== 'No authentication token') {
+            setQuotaUnavailable('Unable to load');
+        }
+    }
 }
 
 function applyClientFilteringAndSorting(files) {
@@ -291,7 +386,7 @@ function uploadWithProgress(file) {
         activeXhr = xhr;
 
         xhr.open('POST', '/api/files', true);
-        xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+        xhr.setRequestHeader('Authorization', 'Bearer ' + token);
 
         xhr.upload.onprogress = (event) => {
             if (!event.lengthComputable) return;
@@ -333,6 +428,7 @@ async function uploadFile(file) {
         searchInput.value = '';
 
         await loadFiles();
+        await loadQuota();
     } catch (err) {
         if (err.message === 'Upload canceled') showError('Upload canceled.');
         else showError('Upload failed. Please retry.');
@@ -357,6 +453,7 @@ async function deleteFile(id) {
         }
 
         await loadFiles();
+        await loadQuota();
     } catch {
         showError('Unable to delete file.');
     }
@@ -465,4 +562,5 @@ if (!token) {
     usernameEl.textContent = getUsername() || 'User';
     hideDropOverlay();
     loadFiles();
+    loadQuota();
 }

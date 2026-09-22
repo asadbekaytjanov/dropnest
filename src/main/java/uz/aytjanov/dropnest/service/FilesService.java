@@ -76,7 +76,7 @@ public class FilesService {
         if (fileRecord.getOwner() == null || !fileRecord.getOwner().getId().equals(userId)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Forbidden");
         }
-        supabaseStorageService.deleteObject(fileRecord.getStoragePath());
+        supabaseStorageService.deleteObject(fileRecord.getStoragePath(), userId, fileRecord.getSizeBytes());
         filesRepository.delete(fileRecord);
     }
 
