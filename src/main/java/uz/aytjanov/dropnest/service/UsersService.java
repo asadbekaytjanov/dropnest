@@ -18,6 +18,7 @@ public class UsersService {
         UserEntity userEntity = new UserEntity();
         userEntity.setUsername(username);
         userEntity.setRole("USER");
+        userEntity.setRemainingStorageBytes(50L * 1024L * 1024L);
         userEntity.setPassword(passwordEncoder.encode(rawPassword));
         usersRepository.save(userEntity);
     }

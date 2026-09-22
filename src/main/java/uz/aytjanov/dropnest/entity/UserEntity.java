@@ -17,6 +17,17 @@ public class UserEntity {
     @Column(nullable = false)
     private String role;
 
+    @Column(nullable = false)
+    private long remainingStorageBytes;
+
+    public long getRemainingStorageBytes() {
+        return remainingStorageBytes;
+    }
+
+    public void setRemainingStorageBytes(long remainingStorageBytes) {
+        this.remainingStorageBytes = remainingStorageBytes;
+    }
+
     public String getRole() {
         return role;
     }

@@ -68,10 +68,10 @@ public class FilesController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "File is empty");
         }
 
-        FileRecord fileRecord = supabaseStorageService.uploadFile(userId, file);
+        ResponseDto response = supabaseStorageService.uploadFile(userId, file);
 
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(new ResponseDto(fileRecord.getOriginalName(), fileRecord.getContentType()));
+                .body(response);
     }
 
     @DeleteMapping("/{id}")

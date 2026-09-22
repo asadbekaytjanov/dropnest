@@ -18,7 +18,7 @@ public class GlobalExceptionHandler {
         ExceptionDto response = new ExceptionDto(
                 HttpStatus.CONTENT_TOO_LARGE.value(),
                 HttpStatus.CONTENT_TOO_LARGE.name(),
-                "Max upload size exceeded! Please keep it under 5MB.",
+                "Max upload size exceeded! Please keep it under 50MB.",
                 request.getRequestURI()
         );
         return ResponseEntity.status(HttpStatus.CONTENT_TOO_LARGE).body(response);
@@ -29,7 +29,7 @@ public class GlobalExceptionHandler {
         ExceptionDto response = new ExceptionDto(
                 HttpStatus.BAD_REQUEST.value(),
                 HttpStatus.BAD_REQUEST.name(),
-                "Only photos and videos are allowed.",
+                "Your storage quota has been exceeded.",
                 request.getRequestURI()
         );
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
