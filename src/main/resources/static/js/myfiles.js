@@ -36,6 +36,102 @@ let activeXhr = null;
 /* Drag overlay state */
 let dragCounter = 0;
 
+/* ===== Error Handling ===== */
+
+class ApiError extends Error {
+    constructor(message, status) {
+        super(message);
+        this.name = 'ApiError';
+        this.status = status;
+    }
+}
+
+function extractBackendMessage(payload) {
+    if (!payload) {
+        return null;
+    }
+
+    if (typeof payload === 'string') {
+        return payload.trim() || null;
+    }
+
+    // Supports common global exception response formats:
+    // { message: "..." }
+    // { error: "..." }
+    // { detail: "..." }
+    // { errors: [...] }
+    if (typeof payload.message === 'string' && payload.message.trim()) {
+        return payload.message;
+    }
+
+    if (typeof payload.error === 'string' && payload.error.trim()) {
+        return payload.error;
+    }
+
+    if (typeof payload.detail === 'string' && payload.detail.trim()) {
+        return payload.detail;
+    }
+
+    if (Array.isArray(payload.errors) && payload.errors.length > 0) {
+        return payload.errors
+            .map(error => {
+                if (typeof error === 'string') return error;
+                return error.message || error.defaultMessage || String(error);
+            })
+            .join(', ');
+    }
+
+    return null;
+}
+
+async function getResponseErrorMessage(response) {
+    const fallback = `Request failed with status ${response.status}`;
+
+    try {
+        const contentType =
+            response.headers.get('content-type') || '';
+
+        if (contentType.includes('application/json')) {
+            const payload = await response.json();
+
+            return extractBackendMessage(payload) || fallback;
+        }
+
+        const text = await response.text();
+
+        return extractBackendMessage(text) || fallback;
+
+    } catch {
+        return fallback;
+    }
+}
+
+function getXhrErrorMessage(xhr) {
+    const fallback = `Upload failed with status ${xhr.status}`;
+
+    if (!xhr.responseText) {
+        return fallback;
+    }
+
+    try {
+        const contentType =
+            xhr.getResponseHeader('content-type') || '';
+
+        if (contentType.includes('application/json')) {
+            const payload = JSON.parse(xhr.responseText);
+
+            return extractBackendMessage(payload) || fallback;
+        }
+
+        return extractBackendMessage(xhr.responseText) || fallback;
+
+    } catch {
+        return fallback;
+    }
+}
+
+/* ===== Auth & API ===== */
+
 function getToken() {
     return localStorage.getItem('token');
 }
@@ -52,9 +148,10 @@ function goToLogin() {
 
 async function apiFetch(url, options = {}) {
     const token = getToken();
+
     if (!token) {
         goToLogin();
-        throw new Error('No authentication token');
+        throw new ApiError('No authentication token', 401);
     }
 
     const headers = new Headers(options.headers || {});
@@ -67,11 +164,22 @@ async function apiFetch(url, options = {}) {
 
     if (response.status === 401 || response.status === 403) {
         goToLogin();
-        throw new Error('Authentication failed');
+        throw new ApiError(
+            'Your session has expired. Please log in again.',
+            response.status
+        );
+    }
+
+    if (!response.ok) {
+        const message = await getResponseErrorMessage(response);
+
+        throw new ApiError(message, response.status);
     }
 
     return response;
 }
+
+/* ===== UI Messages ===== */
 
 function showError(message) {
     const textEl = errorMessage.querySelector('.msg-text') || errorMessage;
@@ -96,6 +204,8 @@ window.hideMessages = hideMessages;
 function showLoading(isLoading) {
     loadingState.style.display = isLoading ? 'block' : 'none';
 }
+
+/* ===== File Utilities ===== */
 
 function classifyType(contentType = '') {
     if (contentType.startsWith('image/')) return 'image';
@@ -234,6 +344,8 @@ function applyClientFilteringAndSorting(files) {
     return result;
 }
 
+/* ===== File Operations ===== */
+
 async function loadFiles() {
     showLoading(true);
     hideMessages();
@@ -243,7 +355,6 @@ async function loadFiles() {
             `/api/files?search=${encodeURIComponent(searchTerm)}&page=${currentPage}&size=${pageSize}`;
 
         const response = await apiFetch(url);
-        if (!response.ok) throw new Error('Failed to load files');
 
         const pageData = await response.json();
         lastPageData = pageData;
@@ -253,9 +364,10 @@ async function loadFiles() {
 
         renderFiles(viewData);
         updatePaginationUI(pageData);
+
     } catch (err) {
-        if (err.message !== 'Authentication failed' && err.message !== 'No authentication token') {
-            showError('Unable to load your files. Please try again.');
+        if (err.status !== 401 && err.status !== 403) {
+            showError(err.message);
         }
     } finally {
         showLoading(false);
@@ -335,8 +447,8 @@ function renderFiles(files) {
 
 async function downloadFile(fileId, fileName) {
     try {
-        const response = await apiFetch(`/api/files/${fileId}/download`);
-        if (!response.ok) throw new Error('Download failed');
+        const response =
+            await apiFetch(`/api/files/${fileId}/download`);
 
         const blob = await response.blob();
         const blobUrl = URL.createObjectURL(blob);
@@ -344,13 +456,40 @@ async function downloadFile(fileId, fileName) {
         const a = document.createElement('a');
         a.href = blobUrl;
         a.download = fileName;
+
         document.body.appendChild(a);
         a.click();
         a.remove();
 
         URL.revokeObjectURL(blobUrl);
-    } catch {
-        showError('Download failed.');
+
+    } catch (err) {
+        if (err.status !== 401 && err.status !== 403) {
+            showError(err.message);
+        }
+    }
+}
+
+async function deleteFile(id) {
+    hideMessages();
+
+    try {
+        await apiFetch(`/api/files/${id}`, {
+            method: 'DELETE'
+        });
+
+        showSuccess('Deleted successfully.');
+
+        if (galleryEl.children.length === 1 && currentPage > 0) {
+            currentPage--;
+        }
+
+        await loadFiles();
+
+    } catch (err) {
+        if (err.status !== 401 && err.status !== 403) {
+            showError(err.message);
+        }
     }
 }
 
@@ -374,7 +513,7 @@ function uploadWithProgress(file) {
         const token = getToken();
         if (!token) {
             goToLogin();
-            reject(new Error('No authentication token'));
+            reject(new ApiError('No authentication token', 401));
             return;
         }
 
@@ -396,18 +535,24 @@ function uploadWithProgress(file) {
 
         xhr.onload = () => {
             activeXhr = null;
-            if (xhr.status >= 200 && xhr.status < 300) resolve();
-            else reject(new Error(`Upload failed ${xhr.status}`));
+
+            if (xhr.status >= 200 && xhr.status < 300) {
+                resolve();
+            } else {
+                const message = getXhrErrorMessage(xhr);
+
+                reject(new ApiError(message, xhr.status));
+            }
         };
 
         xhr.onerror = () => {
             activeXhr = null;
-            reject(new Error('Network error'));
+            reject(new ApiError('Network error', 0));
         };
 
         xhr.onabort = () => {
             activeXhr = null;
-            reject(new Error('Upload canceled'));
+            reject(new ApiError('Upload canceled', 0));
         };
 
         const formData = new FormData();
@@ -430,8 +575,11 @@ async function uploadFile(file) {
         await loadFiles();
         await loadQuota();
     } catch (err) {
-        if (err.message === 'Upload canceled') showError('Upload canceled.');
-        else showError('Upload failed. Please retry.');
+        if (err.message === 'Upload canceled') {
+            showError('Upload canceled.');
+        } else {
+            showError(err.message);
+        }
     } finally {
         uploadPanel.style.display = 'none';
         progressBar.style.width = '0%';
@@ -459,21 +607,23 @@ async function deleteFile(id) {
     }
 }
 
-/* drag overlay helpers */
 function hasFilesInDrag(event) {
     return Array.from(event.dataTransfer?.types || []).includes('Files');
 }
+
 function showDropOverlay() {
     dropZone.classList.remove('hidden');
     dropZone.classList.add('overlay');
 }
+
 function hideDropOverlay() {
     dropZone.classList.add('hidden');
     dropZone.classList.remove('overlay');
     dragCounter = 0;
 }
 
-/* events */
+/* ===== Event Listeners ===== */
+
 uploadBtn.addEventListener('click', () => fileInput.click());
 
 fileInput.addEventListener('change', () => {
@@ -554,7 +704,8 @@ nextBtn.addEventListener('click', () => {
     loadFiles();
 });
 
-/* init */
+/* ===== Initialization ===== */
+
 const token = getToken();
 if (!token) {
     goToLogin();

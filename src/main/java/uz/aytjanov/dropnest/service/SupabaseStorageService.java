@@ -1,5 +1,6 @@
 package uz.aytjanov.dropnest.service;
 
+import jakarta.transaction.Transactional;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
@@ -9,33 +10,39 @@ import uz.aytjanov.dropnest.entity.FileRecord;
 import uz.aytjanov.dropnest.entity.UserEntity;
 import uz.aytjanov.dropnest.repository.FilesRepository;
 import uz.aytjanov.dropnest.repository.UsersRepository;
+
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Set;
+import java.util.UUID;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 @Service
 public class SupabaseStorageService {
+
     private final UsersRepository usersRepository;
     private final FilesRepository filesRepository;
     private final RestClient restClient = RestClient.create();
-    public SupabaseStorageService(UsersRepository usersRepository, FilesRepository filesRepository) {
-        this.usersRepository = usersRepository;
-        this.filesRepository = filesRepository;
-    }
+
+    private static final long MAX_FILE_SIZE =
+            5L * 1024L * 1024L;
+
     private static final Set<String> ALLOWED_TYPES = Set.of(
-            // Images
-            "image/jpeg", "image/png", "image/webp", "image/gif",
+            "image/jpeg",
+            "image/png",
+            "image/webp",
+            "image/gif",
 
-            // Video
-            "video/mp4", "video/webm", "video/quicktime",
+            "video/mp4",
+            "video/webm",
+            "video/quicktime",
 
-            // Audio
-            "audio/mpeg", "audio/wav", "audio/ogg",
+            "audio/mpeg",
+            "audio/wav",
+            "audio/ogg",
 
-            // Documents
             "application/pdf",
             "text/plain",
             "text/csv",
@@ -43,7 +50,6 @@ public class SupabaseStorageService {
             "application/xml",
             "text/xml",
 
-            // Office
             "application/msword",
             "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
             "application/vnd.ms-excel",
@@ -51,22 +57,57 @@ public class SupabaseStorageService {
             "application/vnd.ms-powerpoint",
             "application/vnd.openxmlformats-officedocument.presentationml.presentation",
 
-            // Archives
             "application/zip",
             "application/x-7z-compressed",
             "application/x-rar-compressed",
             "application/gzip"
     );
 
-    public void validateFile (MultipartFile file) {
-        if (file.isEmpty()) throw new IllegalArgumentException("File is empty. Please upload a valid file.");
-        long maxBytes = 5 * 1024 * 1024;
-        if (file.getSize() > maxBytes) throw new IllegalArgumentException("File exceeds the 5MB limit.");
-        String contentType = file.getContentType();
-        if (contentType == null || !ALLOWED_TYPES.contains(contentType))
-            throw new IllegalArgumentException("This type is not allowed!");
+    public SupabaseStorageService(
+            UsersRepository usersRepository,
+            FilesRepository filesRepository
+    ) {
+        this.usersRepository = usersRepository;
+        this.filesRepository = filesRepository;
     }
-    public FileRecord uploadFile(Long userId, MultipartFile file) throws IOException {
+
+    public void validateFile(MultipartFile file) {
+
+        if (file == null || file.isEmpty()) {
+            throw new IllegalArgumentException(
+                    "File is empty. Please upload a valid file."
+            );
+        }
+
+        if (file.getSize() > MAX_FILE_SIZE) {
+            throw new IllegalArgumentException(
+                    "File exceeds the 50 MiB limit."
+            );
+        }
+
+        String contentType = file.getContentType();
+
+        if (contentType == null
+                || !ALLOWED_TYPES.contains(contentType)) {
+            throw new IllegalArgumentException(
+                    "This file type is not allowed."
+            );
+        }
+
+        if (file.getOriginalFilename() == null
+                || file.getOriginalFilename().isBlank()) {
+            throw new IllegalArgumentException(
+                    "The file must have a name."
+            );
+        }
+    }
+
+    @Transactional
+    public ResponseDto uploadFile(
+            Long userId,
+            MultipartFile file
+    ) throws IOException {
+
         validateFile(file);
         UserEntity user = usersRepository.findUserById(userId);
         if (user == null) {
@@ -108,12 +149,52 @@ public class SupabaseStorageService {
         String baseUrl = System.getenv("SUPABASE_URL");
         String key = System.getenv("SUPABASE_KEY");
 
-        String deleteUrl = baseUrl + "/storage/v1/object/files/" + objectKey;
+    @Transactional
+    public void deleteObject(
+            String objectKey,
+            Long userId,
+            long fileSize
+    ) {
+        deleteFromSupabase(objectKey);
+
+        UserEntity user = usersRepository.findUserById(userId);
+
+        if (user == null) {
+            throw new IllegalArgumentException(
+                    "User not found."
+            );
+        }
+
+        long updatedRemainingBytes =
+                user.getRemainingStorageBytes() + fileSize;
+
+        user.setRemainingStorageBytes(updatedRemainingBytes);
+
+        usersRepository.save(user);
+    }
+
+    private void deleteFromSupabase(String objectKey) {
+
+        String supabaseUrl = requireEnvironmentVariable(
+                "SUPABASE_URL"
+        );
+
+        String supabaseKey = requireEnvironmentVariable(
+                "SUPABASE_KEY"
+        );
+
+        String deleteUrl =
+                supabaseUrl
+                        + "/storage/v1/object/files/"
+                        + objectKey;
 
         restClient.delete()
                 .uri(deleteUrl)
-                .header("Authorization", "Bearer " + key)
-                .header("apikey", key)
+                .header(
+                        "Authorization",
+                        "Bearer " + supabaseKey
+                )
+                .header("apikey", supabaseKey)
                 .retrieve()
                 .toBodilessEntity();
 
@@ -127,4 +208,16 @@ public class SupabaseStorageService {
         }
     }
 
+    private String requireEnvironmentVariable(String name) {
+
+        String value = System.getenv(name);
+
+        if (value == null || value.isBlank()) {
+            throw new IllegalStateException(
+                    name + " environment variable is missing."
+            );
+        }
+
+        return value;
+    }
 }
