@@ -17,16 +17,8 @@ public class UserEntity {
     @Column(nullable = false)
     private String role;
 
-    @Column(nullable = false)
-    private long remainingStorageBytes;
-
-    public long getRemainingStorageBytes() {
-        return remainingStorageBytes;
-    }
-
-    public void setRemainingStorageBytes(long remainingStorageBytes) {
-        this.remainingStorageBytes = remainingStorageBytes;
-    }
+    @Column(name = "remaining_storage_bytes", nullable = false)
+    private Long remainingStorageBytes;
 
     public String getRole() {
         return role;
@@ -58,6 +50,14 @@ public class UserEntity {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Long getRemainingStorageBytes() {
+        return remainingStorageBytes;
+    }
+
+    public void setRemainingStorageBytes(Long remainingStorageBytes) {
+        this.remainingStorageBytes = remainingStorageBytes;
     }
 
 }

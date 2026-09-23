@@ -7,6 +7,7 @@ import uz.aytjanov.dropnest.repository.UsersRepository;
 
 @Service
 public class UsersService {
+    public static final long TOTAL_QUOTA_BYTES = 50L * 1024L * 1024L;
     private final UsersRepository usersRepository;
     private final PasswordEncoder passwordEncoder;
     public UsersService(UsersRepository usersRepository, PasswordEncoder passwordEncoder) {
@@ -18,12 +19,16 @@ public class UsersService {
         UserEntity userEntity = new UserEntity();
         userEntity.setUsername(username);
         userEntity.setRole("USER");
-        userEntity.setRemainingStorageBytes(50L * 1024L * 1024L);
+        userEntity.setRemainingStorageBytes(TOTAL_QUOTA_BYTES);
         userEntity.setPassword(passwordEncoder.encode(rawPassword));
         usersRepository.save(userEntity);
     }
 
     public boolean isUserExist(String username) {
         return usersRepository.findByUsername(username) != null;
+    }
+
+    public UserEntity findById(Long userId) {
+        return usersRepository.findUserById(userId);
     }
 }

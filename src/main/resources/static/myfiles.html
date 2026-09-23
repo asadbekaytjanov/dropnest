@@ -20,6 +20,42 @@
     </header>
 
     <section class="panel">
+      <section id="quotaCard" class="quota-card" aria-labelledby="quotaHeading">
+        <div class="quota-head">
+          <h2 id="quotaHeading">Storage quota</h2>
+          <span id="quotaStatus" class="quota-status">Loading...</span>
+        </div>
+        <div class="quota-metric-row">
+          <strong id="quotaUsageText">-- / --</strong>
+          <span id="quotaPercentText">--%</span>
+        </div>
+        <div class="quota-progress-track" role="img" aria-label="Storage usage progress">
+          <div
+                  id="quotaProgressBar"
+                  class="quota-progress-bar"
+                  role="progressbar"
+                  aria-valuemin="0"
+                  aria-valuemax="100"
+                  aria-valuenow="0"
+                  aria-valuetext="Storage usage loading"
+          ></div>
+        </div>
+        <div class="quota-detail-grid">
+          <div>
+            <span class="quota-label">Used</span>
+            <span id="quotaUsedText">--</span>
+          </div>
+          <div>
+            <span class="quota-label">Remaining</span>
+            <span id="quotaRemainingText">--</span>
+          </div>
+          <div>
+            <span class="quota-label">Total</span>
+            <span id="quotaTotalText">--</span>
+          </div>
+        </div>
+      </section>
+
       <div class="toolbar">
         <input type="text" id="searchInput" placeholder="Search files..." />
         <select id="typeFilter">
