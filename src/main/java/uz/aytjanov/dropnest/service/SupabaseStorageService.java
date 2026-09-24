@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
+import uz.aytjanov.dropnest.dto.ResponseDto;
 import uz.aytjanov.dropnest.entity.FileRecord;
 import uz.aytjanov.dropnest.entity.UserEntity;
 import uz.aytjanov.dropnest.repository.FilesRepository;
@@ -15,7 +16,6 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Set;
-import java.util.UUID;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
@@ -81,7 +81,7 @@ public class SupabaseStorageService {
 
         if (file.getSize() > MAX_FILE_SIZE) {
             throw new IllegalArgumentException(
-                    "File exceeds the 50 MiB limit."
+                    "File exceeds the 5 MiB limit."
             );
         }
 
@@ -114,19 +114,24 @@ public class SupabaseStorageService {
             throw new ResponseStatusException(BAD_REQUEST, "User not found");
         }
 
-        long currentRemaining = Math.max(0L,
-                user.getRemainingStorageBytes() == null ? UsersService.TOTAL_QUOTA_BYTES : user.getRemainingStorageBytes());
-        if (file.getSize() > currentRemaining) {
+        long currentRemaining =
+                user.getRemainingStorageBytes() == null
+                        ? UsersService.TOTAL_QUOTA_BYTES
+                        : Math.max(0L, user.getRemainingStorageBytes());
+        long fileSize = file.getSize();
+
+        if (fileSize > currentRemaining) {
             throw new ResponseStatusException(BAD_REQUEST, "Not enough storage quota remaining.");
         }
 
         String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
         String objectKey = userId + "/" + fileName;
-        String uploadUrl = System.getenv("SUPABASE_URL") + "/storage/v1/object/files/" + objectKey;
+        String uploadUrl = requireEnvironmentVariable("SUPABASE_URL") + "/storage/v1/object/files/" + objectKey;
+        String supabaseKey = requireEnvironmentVariable("SUPABASE_KEY");
         restClient.post()
                 .uri(uploadUrl)
-                .header("Authorization", "Bearer " + System.getenv("SUPABASE_KEY"))
-                .header("apikey", System.getenv("SUPABASE_KEY"))
+                .header("Authorization", "Bearer " + supabaseKey)
+                .header("apikey", supabaseKey)
                 .contentType(MediaType.parseMediaType(Objects.requireNonNull(file.getContentType())))
                 .body(file.getBytes())
                 .retrieve()
@@ -135,19 +140,18 @@ public class SupabaseStorageService {
         fileEntity.setOwner(user);
         fileEntity.setContentType(file.getContentType());
         fileEntity.setOriginalName(file.getOriginalFilename());
-        fileEntity.setStoredName(file.getName());
         fileEntity.setStoragePath(objectKey);
         fileEntity.setStoredName(fileName);
-        fileEntity.setSizeBytes(file.getSize());
+        fileEntity.setSizeBytes(fileSize);
         fileEntity.setCreatedAt(LocalDateTime.now());
         FileRecord savedFileRecord = filesRepository.save(fileEntity);
         user.setRemainingStorageBytes(currentRemaining - savedFileRecord.getSizeBytes());
         usersRepository.save(user);
-        return savedFileRecord;
+        return new ResponseDto(
+                savedFileRecord.getOriginalName(),
+                savedFileRecord.getContentType()
+        );
     }
-    public void deleteObject(String objectKey, Long userId, long fileSize) {
-        String baseUrl = System.getenv("SUPABASE_URL");
-        String key = System.getenv("SUPABASE_KEY");
 
     @Transactional
     public void deleteObject(
@@ -165,8 +169,14 @@ public class SupabaseStorageService {
             );
         }
 
-        long updatedRemainingBytes =
-                user.getRemainingStorageBytes() + fileSize;
+        long currentRemaining =
+                user.getRemainingStorageBytes() == null
+                        ? UsersService.TOTAL_QUOTA_BYTES
+                        : Math.max(0L, user.getRemainingStorageBytes());
+        long updatedRemainingBytes = Math.min(
+                UsersService.TOTAL_QUOTA_BYTES,
+                currentRemaining + fileSize
+        );
 
         user.setRemainingStorageBytes(updatedRemainingBytes);
 
@@ -197,15 +207,6 @@ public class SupabaseStorageService {
                 .header("apikey", supabaseKey)
                 .retrieve()
                 .toBodilessEntity();
-
-        UserEntity user = usersRepository.findUserById(userId);
-        if (user != null) {
-            long currentRemaining = Math.max(0L,
-                    user.getRemainingStorageBytes() == null ? UsersService.TOTAL_QUOTA_BYTES : user.getRemainingStorageBytes());
-            long updatedRemaining = Math.min(UsersService.TOTAL_QUOTA_BYTES, currentRemaining + fileSize);
-            user.setRemainingStorageBytes(updatedRemaining);
-            usersRepository.save(user);
-        }
     }
 
     private String requireEnvironmentVariable(String name) {

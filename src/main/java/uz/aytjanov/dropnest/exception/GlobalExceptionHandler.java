@@ -29,10 +29,20 @@ public class GlobalExceptionHandler {
         ExceptionDto response = new ExceptionDto(
                 HttpStatus.BAD_REQUEST.value(),
                 HttpStatus.BAD_REQUEST.name(),
-                "Your storage quota has been exceeded.",
+                exc.getMessage() != null ? exc.getMessage() : "Bad request",
                 request.getRequestURI()
         );
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<ExceptionDto> illegalStateExc(IllegalStateException exc, HttpServletRequest request) {
+        ExceptionDto response = new ExceptionDto(
+                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                HttpStatus.INTERNAL_SERVER_ERROR.name(),
+                exc.getMessage() != null ? exc.getMessage() : "Unexpected server error",
+                request.getRequestURI()
+        );
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
     @ExceptionHandler(ResponseStatusException.class)
     public ResponseEntity<ExceptionDto> handleResponseStatusException(
