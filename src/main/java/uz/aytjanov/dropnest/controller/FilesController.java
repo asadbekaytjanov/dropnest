@@ -1,5 +1,6 @@
 package uz.aytjanov.dropnest.controller;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.PageRequest;
@@ -19,15 +20,12 @@ import java.io.IOException;
 
 @RestController
 @RequestMapping("/api/files")
+@RequiredArgsConstructor
 public class FilesController {
 
     private final FilesService filesService;
     private final SupabaseStorageService supabaseStorageService;
 
-    public FilesController(FilesService filesService, SupabaseStorageService supabaseStorageService) {
-        this.filesService = filesService;
-        this.supabaseStorageService = supabaseStorageService;
-    }
 
     private Long requireUserId(CustomUserDetails currentUser) {
         if (currentUser == null || currentUser.getId() == null) {

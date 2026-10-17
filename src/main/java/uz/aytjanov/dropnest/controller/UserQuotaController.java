@@ -1,5 +1,6 @@
 package uz.aytjanov.dropnest.controller;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -14,12 +15,9 @@ import uz.aytjanov.dropnest.service.UsersService;
 
 @RestController
 @RequestMapping("/api/users")
+@RequiredArgsConstructor
 public class UserQuotaController {
     private final UsersService usersService;
-
-    public UserQuotaController(UsersService usersService) {
-        this.usersService = usersService;
-    }
 
     @GetMapping("/me/quota")
     public ResponseEntity<UserQuotaDto> getMyQuota(@AuthenticationPrincipal CustomUserDetails currentUser) {

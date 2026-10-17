@@ -1,7 +1,6 @@
 package uz.aytjanov.dropnest.entity;
 
 import jakarta.persistence.*;
-
 import java.time.LocalDateTime;
 
 @Entity
@@ -33,6 +32,15 @@ public class FileRecord {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "owner_id", nullable = false)
     private UserEntity owner;
+    private String s3ObjectKey;
+
+    public String getS3ObjectKey() {
+        return s3ObjectKey;
+    }
+
+    public void setS3ObjectKey(String s3ObjectKey) {
+        this.s3ObjectKey = s3ObjectKey;
+    }
 
     @PrePersist
     public void prePersist() {

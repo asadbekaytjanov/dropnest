@@ -1,6 +1,7 @@
 package uz.aytjanov.dropnest.service;
 
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.*;
@@ -16,19 +17,12 @@ import static org.springframework.http.HttpStatus.FORBIDDEN;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @Service
+@RequiredArgsConstructor
 public class FilesService {
 
     private final FilesRepository filesRepository;
     private final SupabaseStorageService supabaseStorageService;
     private final RestClient restClient = RestClient.create();
-
-    public FilesService(
-            FilesRepository filesRepository,
-            SupabaseStorageService supabaseStorageService
-    ) {
-        this.filesRepository = filesRepository;
-        this.supabaseStorageService = supabaseStorageService;
-    }
 
     public FileRecord getFile(Long id, Long userId) {
 

@@ -1,6 +1,7 @@
 package uz.aytjanov.dropnest.controller;
 
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -16,15 +17,11 @@ import org.springframework.security.core.AuthenticationException;
 
 @RestController
 @RequestMapping("/api/auth")
+@RequiredArgsConstructor
 public class UsersController {
    private final UsersService usersService;
    private final JwtUtils jwtUtils;
    private final AuthenticationManager authenticationManager;
-    public UsersController(UsersService usersService, JwtUtils jwtUtils, AuthenticationManager authenticationManager) {
-        this.usersService = usersService;
-        this.jwtUtils = jwtUtils;
-        this.authenticationManager = authenticationManager;
-    }
 
    @PostMapping("/signup")
    public ResponseEntity<Map<String, Object>> createUser(@RequestParam String username, @RequestParam String password) {
